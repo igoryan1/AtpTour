@@ -1,0 +1,95 @@
+﻿@model ATP.Models.Favorite
+
+@{
+    ViewData["Title"] = "Favorite Players";
+    string baseUrl = "https://www.atptour.com/";
+}
+<h1>@ViewData["Title"]</h1>
+
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Favorite Rank</th>
+            <th>Atp Rank</th>
+            <th>Last Name</th>
+            <th>First Name</th>
+            <th>Country</th>
+            <th>Age</th>
+            <th>Points</th>
+            <th>Pic</th>
+        </tr>
+    </thead>
+    <tbody id="playersTable" data-bind="foreach: players">
+        <tr>
+            <td>
+                <span class="playerFavRank" data-bind="text: favRank, valueUpdate: 'change'"></span>
+                <input type="hidden" class="playerId" data-bind="text: id">
+            </td>
+            <td>
+                <span data-bind="text: atpRank"></span>
+            </td>
+            <td>
+                <span data-bind="text: lastName"></span>
+            </td>
+            <td>
+                <span data-bind="text: firstName"></span>
+            </td>
+            <td>
+                <span data-bind="text: country"></span>
+            </td>
+            <td>
+                <span data-bind="text: age"></span>
+            </td>
+            <td>
+                <span data-bind="text: points"></span>
+            </td>
+            <td>
+                <img style="width:50px;height:50px;" data-bind="attr:{src:'@baseUrl' + picUrl}" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div data-bind="visible: !hasFavorites" class="alert alert-primary" role="alert">
+    NO FAVORITES YET. GO BACK TO PLAYERS TAB AND SELECT FAVORITE PLAYERS
+</div>
+
+<div class="d-flex justify-content-center">
+    <button type="button" data-toggle="tooltip" data-placement="bottom" title="Drag rows to rearrage favorite players" data-bind="click: updateFavorites, enable: dirty, class: buttonStyle">Update Favorites Order</button>
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+
+        var model = @Html.Raw(Json.Serialize(Model));
+
+        var vmModel = new FavoriteVM(model);
+        ko.applyBindings(vmModel);
+
+        // using Jquery sortable to reorder table rows
+        // first need to fix the width of the row when being dragged
+        var fixHelper = function (e, ui) {
+            ui.children().each(function () {
+                $(this).width($(this).width());
+            });
+            return ui;
+        };
+        $('#playersTable').sortable({
+            helper: fixHelper
+        }).disableSelection();
+
+        $('#playersTable').sortable({
+            stop: function (event, tr) {
+                $('tr').each(function (index, element) {
+                    var spanElement = $(element).find('.playerFavRank:first');
+                    spanElement.text(index)
+
+                    // the above doesnt update the binding for some reason, so just do it manually
+                    var id = $(element).find('.playerId:first').text();
+                    vmModel.updateFavRank(id, index);
+                })
+            }
+        })
+    </script>
+}
