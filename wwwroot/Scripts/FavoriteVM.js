@@ -24,7 +24,6 @@
         if (fav) {
             fav.favRank(favRank);
             self.dirty(true);
-           // fav.favRank.valueHasMutated();
         }
     }
 

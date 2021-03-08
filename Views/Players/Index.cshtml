@@ -1,38 +1,63 @@
 ﻿@model IEnumerable<ATP.Models.Player>
 @using System.Text.Json;
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
 
 @{
     ViewData["Title"] = "Top Players";
-    string baseUrl = "https://www.atptour.com/";
+    string baseUrl = @Configuration["AtpMediaBaseUrl"];
 }
 <h1>@ViewData["Title"]</h1>
 
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("index", "players", FormMethod.Get))
 {
-<div class="form-group">
-    <div class="row">
-        <div class="col-sm-2">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="">From Rank</span>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="">From Rank</span>
+                    </div>
+                    <input type="number" class="form-control" name="FromRank" value="@ViewData["FromRank"]" />
                 </div>
-                @Html.TextBox("FromRank", null, new { @class = "form-control", @type = "number" })
             </div>
-        </div>
-        <div class="col-sm-2">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="">To Rank</span>
+            <div class="col-sm-2">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="">To Rank</span>
+                    </div>
+                    <input type="number" class="form-control" name="ToRank" value="@ViewData["ToRank"]" />
                 </div>
-                @Html.TextBox("ToRank", null, new { @class = "form-control", @type = "number" })
             </div>
-        </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-outline-primary">Search</button>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary">Search</button>
+            </div>
+
+
+            @{
+                var prevDisabled = !(bool)ViewData["HasPrevious"] ? "disabled" : "";
+                var nextDisabled = !(bool)ViewData["HasNext"] ? "disabled" : "";
+            }
+            <div class="btn-group col-md-4" role="group" aria-label="Basic example">
+                <a asp-action="Index"
+                   asp-route-pageNumber="@((int?)ViewData["PageNumber"] - 1)"
+                   asp-route-fromRank="@ViewData["FromRank"]"
+                   asp-route-toRank="@ViewData["ToRank"]"
+                   class="btn btn-outline-primary @prevDisabled">
+                    Previois
+                </a>
+                <a asp-action="Index"
+                   asp-route-pageNumber="@((int?)ViewData["PageNumber"] + 1)"
+                   asp-route-fromRank="@ViewData["FromRank"]"
+                   asp-route-toRank="@ViewData["ToRank"]"
+                   class="btn btn-outline-primary @nextDisabled">
+                    Next
+                </a>
+            </div>
         </div>
     </div>
-</div>
 }
 
 <table class="table table-hover">
@@ -64,37 +89,37 @@
     <tbody>
         @foreach (var item in Model)
         {
-        <tr class="playerRow" data-toggle="modal" data-bind="@JsonSerializer.Serialize(item)" data-target="#playerModal">
-            <td class="modal-no-open">
-                @Html.CheckBoxFor(modelItem => item.Favorite)
-                @*<label class="fancy-checkbox">
-                    <input type="checkbox" name="RememberMe" id="RememberMe"
-                           value="true"
-                           class="with-font"
-                           checked="@(item.Favorite)" />
-                        <i class="fa fa-circle-o unchecked"></i>
-                        <i class="fa fa-circle checked"></i>
-                    </label>*@
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Rank)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FirstName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CountryName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Points)
-            </td>
-            <td>
-                <img style="width:50px;height:50px;" src="@Url.Content(baseUrl + item.PlayerHeadshotImageCmsUrl)" alt="HeadShotImage" />
-            </td>
-        </tr>
+            <tr class="playerRow" data-toggle="modal" data-bind="@JsonSerializer.Serialize(item)" data-target="#playerModal">
+                <td class="modal-no-open">
+                    @Html.CheckBoxFor(modelItem => item.Favorite)
+                    @*<label class="fancy-checkbox">
+                        <input type="checkbox" name="RememberMe" id="RememberMe"
+                               value="true"
+                               class="with-font"
+                               checked="@(item.Favorite)" />
+                            <i class="fa fa-circle-o unchecked"></i>
+                            <i class="fa fa-circle checked"></i>
+                        </label>*@
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Rank)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FirstName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CountryName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Points)
+                </td>
+                <td>
+                    <img style="width:50px;height:50px;" src="@Url.Content(baseUrl + item.PlayerHeadshotImageCmsUrl)" alt="HeadShotImage" />
+                </td>
+            </tr>
         }
     </tbody>
 </table>

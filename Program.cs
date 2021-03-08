@@ -26,7 +26,6 @@ namespace ATP
                 try
                 {
                     var context = services.GetRequiredService<FavoritesContext>();
-                    context.Database.EnsureDeleted();
                     context.Database.EnsureCreated();
                 }
                 catch (Exception ex)

@@ -26,12 +26,22 @@ namespace ATP.Controllers
             _cacheService = cacherService;
         }
 
-        public async Task<IActionResult> Index(int? fromRank, int? toRank)
+        public async Task<IActionResult> Index(int? fromRank = 1, int? toRank = 10, int? pageNumber = 1)
         {
             var urlParams = $"/rankings.ranksglrollrange?fromrank={fromRank ?? 1}&torank={toRank ?? 10}";
             var client = _clientFactory.CreateClient();
             var results = await client.GetFromJsonAsync<PlayerModel>($"{_baseUrl}{urlParams}");
             var topRatedPlayers = results.Data.Rankings.Players;
+
+            ViewData["FromRank"] = fromRank;
+            ViewData["ToRank"] = toRank;
+            ViewData["PageNumber"] = pageNumber ?? ViewData["PageNumber"] ?? 1;
+            ViewData["HasPrevious"] = pageNumber > 1;
+            ViewData["HasNext"] = ((toRank - fromRank) / pageNumber > 10) && topRatedPlayers.Any();
+
+            // get only records for the given page number
+            topRatedPlayers = topRatedPlayers.Skip(((pageNumber ?? 0) - 1) * 10).Take(10).ToList();
+
 
             // mark the favorite ones
             var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;

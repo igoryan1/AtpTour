@@ -1,8 +1,10 @@
 ﻿@model ATP.Models.Favorite
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 
 @{
     ViewData["Title"] = "Favorite Players";
-    string baseUrl = "https://www.atptour.com/";
+    string baseUrl = @Configuration["AtpMediaBaseUrl"];
 }
 <h1>@ViewData["Title"]</h1>
 
